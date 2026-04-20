@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment & Parts Tracker</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --text-color: #333;
+            --card-bg: #fff;
+            --border-color: #ddd;
+            --btn-bg: #e0e0e0;
+            --btn-hover: #d0d0d0;
+            --header-bg: #fff;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --border-color: #333;
+            --btn-bg: #333;
+            --btn-hover: #444;
+            --header-bg: #1e1e1e;
+            --shadow: 0 4px 6px rgba(0,0,0,0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        button {
+            background-color: var(--btn-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover { background-color: var(--btn-hover); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button.danger { color: #d9534f; font-weight: bold; }
+        button.action { background-color: #4CAF50; color: white; border: none; }
+        button.action:hover { background-color: #45a049; }
+
+        main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            padding-bottom: 100px; /* Space for footer */
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border-top: 5px solid gray;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .card-header h2 {
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header h2:hover::after { content: '✎'; font-size: 0.8rem; color: gray; }
+
+        .part-container {
+            background-color: var(--bg-color);
+            border-radius: 4px;
+            margin-bottom: 8px;
+            padding: 10px;
+        }
+
+        .part-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .part-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .part-name { cursor: pointer; font-weight: 500; }
+        .part-name:hover { text-decoration: underline; }
+
+        .part-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .counter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+        }
+
+        .counter button { padding: 2px 8px; font-size: 16px; }
+
+        .move-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .move-controls button { padding: 0px 5px; font-size: 10px; }
+
+        .photo-area {
+            margin-top: 10px;
+            text-align: center;
+        }
+        .photo-area img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 4px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Shopping List */
+        .shopping-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .shopping-item.checked span {
+            text-decoration: line-through;
+            color: gray;
+        }
+        .shopping-item span { flex: 1; }
+
+        .add-shopping {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .add-shopping input { flex: 1; }
+
+        .app-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border-color);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        footer {
+            background-color: var(--header-bg);
+            padding: 15px 20px;
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="text"], input[type="color"] {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        input[type="color"] {
+            height: 35px;
+            width: 50px;
+            padding: 2px;
+            cursor: pointer;
+        }
+
+        input[type="file"] { display: none; }
+        .file-label {
+            background-color: var(--btn-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .file-label:hover { background-color: var(--btn-hover); }
+
+        @media (max-width: 600px) {
+            .part-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .part-controls { width: 100%; justify-content: space-between; }
+        }
+    </style>
+</head>
+<body>
+
+    <main id="main-content">
+        <div id="equipment-container"></div>
+
+        <div class="card" style="border-top-color: #4CAF50;">
+            <div class="card-header" style="margin-bottom: 0; padding-bottom: 15px;">
+                <h2 style="cursor: default;">🛒 Shopping List</h2>
+            </div>
+            <div class="add-shopping">
+                <input type="text" id="newShopItem" placeholder="Add item to shopping list..." onkeypress="handleShopEnter(event)">
+                <button class="action" onclick="addShopItem()">Add</button>
+            </div>
+            <div id="shopping-list-container"></div>
+        </div>
+
+        <div class="app-controls">
+            <button onclick="toggleTheme()">🌓 Toggle Light/Dark Mode</button>
+            <button onclick="exportData()">📤 Export Data</button>
+            <label class="file-label" style="font-size: 14px; padding: 6px 12px;">
+                📥 Import Data
+                <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+            </label>
+        </div>
+    </main>
+
+    <footer>
+        <input type="text" id="newEqName" placeholder="New Equipment Name..." onkeypress="handleEqEnter(event)">
+        <input type="color" id="newEqColor" value="#2196F3" title="Select Highlight Color">
+        <button class="action" onclick="addEquipment()">+ Add Equipment</button>
+    </footer>
+
+    <script>
+        // State Management
+        let appData = {
+            equipment: [],
+            shopping: []
+        };
+
+        // Load data on startup
+        window.onload = () => {
+            const savedData = localStorage.getItem('partsAppTracker');
+            if (savedData) {
+                try {
+                    appData = JSON.parse(savedData);
+                } catch (e) { console.error("Error parsing saved data"); }
+            }
+            
+            const isDark = localStorage.getItem('partsAppTheme') === 'dark';
+            if (isDark) document.body.classList.add('dark-mode');
+            
+            render();
+        };
+
+        function saveData() {
+            try {
+                localStorage.setItem('partsAppTracker', JSON.stringify(appData));
+            } catch (e) {
+                alert("Storage limit reached! Try removing some photos to save space.");
+            }
+        }
+
+        // --- Render Functions ---
+        function render() {
+            const eqContainer = document.getElementById('equipment-container');
+            const shopContainer = document.getElementById('shopping-list-container');
+            
+            eqContainer.innerHTML = '';
+            shopContainer.innerHTML = '';
+
+            // Render Equipment
+            appData.equipment.forEach((eq, eqIndex) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.borderTopColor = eq.color || '#ccc';
+
+                // Card Header
+                const header = document.createElement('div');
+                header.className = 'card-header';
+                
+                header.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="move-controls">
+                            <button onclick="moveEquipment(${eqIndex}, -1)" ${eqIndex === 0 ? 'disabled' : ''}>▲</button>
+                            <button onclick="moveEquipment(${eqIndex}, 1)" ${eqIndex === appData.equipment.length - 1 ? 'disabled' : ''}>▼</button>
+                        </div>
+                        <input type="color" value="${eq.color || '#ccc'}" onchange="changeEqColor(${eqIndex}, this.value)" style="width: 30px; height: 30px; padding: 0; border: none; cursor: pointer; background: none;" title="Change Equipment Color">
+                        <h2 onclick="editEquipment(${eqIndex})">${eq.name}</h2>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button class="action" onclick="addPart(${eqIndex})">+ Add Part</button>
+                        <button class="danger" onclick="deleteEquipment(${eqIndex})" title="Delete Equipment">X</button>
+                    </div>
+                `;
+                card.appendChild(header);
+
+                // Parts List
+                eq.parts.forEach((part, partIndex) => {
+                    const partContainer = document.createElement('div');
+                    partContainer.className = 'part-container';
+                    
+                    partContainer.innerHTML = `
+                        <div class="part-item">
+                            <div class="part-info">
+                                <div class="move-controls">
+                                    <button onclick="movePart(${eqIndex}, ${partIndex}, -1)" ${partIndex === 0 ? 'disabled' : ''}>▲</button>
+                                    <button onclick="movePart(${eqIndex}, ${partIndex}, 1)" ${partIndex === eq.parts.length - 1 ? 'disabled' : ''}>▼</button>
+                                </div>
+                                <span class="part-name" onclick="editPart(${eqIndex}, ${partIndex})">${part.name}</span>
+                            </div>
+                            <div class="part-controls">
+                                <label class="file-label" title="Attach Photo">
+                                    📷 Add
+                                    <input type="file" accept="image/*" onchange="attachPhoto(${eqIndex}, ${partIndex}, event)">
+                                </label>
+                                ${part.photo ? `<button onclick="togglePhoto(${eqIndex}, ${partIndex})" style="padding: 4px 8px; font-size: 12px;">${part.showPhoto ? '🙈 Hide' : '👁️ Show'}</button>` : ''}
+                                <div class="counter">
+                                    <button onclick="updateCount(${eqIndex}, ${partIndex}, -1)">-</button>
+                                    <span>${part.count}</span>
+                                    <button onclick="updateCount(${eqIndex}, ${partIndex}, 1)">+</button>
+                                </div>
+                                <button class="danger" onclick="deletePart(${eqIndex}, ${partIndex})">X</button>
+                            </div>
+                        </div>
+                        ${part.photo && part.showPhoto ? `
+                            <div class="photo-area">
+                                <img src="${part.photo}" alt="Part Photo">
+                                <br>
+                                <button class="danger" onclick="removePhoto(${eqIndex}, ${partIndex})" style="margin-top: 10px; font-size: 12px;">🗑️ Remove Photo</button>
+                            </div>
+                        ` : ''}
+                    `;
+                    card.appendChild(partContainer);
+                });
+
+                eqContainer.appendChild(card);
+            });
+
+            // Render Shopping List
+            appData.shopping.forEach((item, index) => {
+                const shopRow = document.createElement('div');
+                shopRow.className = `shopping-item ${item.checked ? 'checked' : ''}`;
+                
+                shopRow.innerHTML = `
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShopItem(${index})">
+                    <span>${item.name}</span>
+                    <button class="danger" onclick="deleteShopItem(${index})">X</button>
+                `;
+                shopContainer.appendChild(shopRow);
+            });
+
+            saveData();
+        }
+
+        // --- Equipment Actions ---
+        function addEquipment() {
+            const nameInput = document.getElementById('newEqName');
+            const colorInput = document.getElementById('newEqColor');
+            const name = nameInput.value.trim();
+            
+            if (name) {
+                appData.equipment.push({
+                    name: name,
+                    color: colorInput.value,
+                    parts: []
+                });
+                nameInput.value = '';
+                render();
+                window.scrollTo(0, document.body.scrollHeight);
+            }
+        }
+
+        function handleEqEnter(e) { if (e.key === 'Enter') addEquipment(); }
+
+        function deleteEquipment(index) {
+            if (confirm(`Are you sure you want to delete ${appData.equipment[index].name} and all its parts?`)) {
+                appData.equipment.splice(index, 1);
+                render();
+            }
+        }
+
+        function editEquipment(index) {
+            const newName = prompt('Edit Equipment Name:', appData.equipment[index].name);
+            if (newName && newName.trim() !== '') {
+                appData.equipment[index].name = newName.trim();
+                render();
+            }
+        }
+
+        function changeEqColor(index, newColor) {
+            appData.equipment[index].color = newColor;
+            render();
+        }
+
+        function moveEquipment(index, direction) {
+            if (index + direction >= 0 && index + direction < appData.equipment.length) {
+                const temp = appData.equipment[index];
+                appData.equipment[index] = appData.equipment[index + direction];
+                appData.equipment[index + direction] = temp;
+                render();
+            }
+        }
+
+        // --- Part Actions ---
+        function addPart(eqIndex) {
+            const partName = prompt('Enter new part name/number:');
+            if (partName && partName.trim() !== '') {
+                appData.equipment[eqIndex].parts.push({
+                    name: partName.trim(),
+                    count: 0,
+                    photo: null,
+                    showPhoto: false
+                });
+                render();
+            }
+        }
+
+        function editPart(eqIndex, partIndex) {
+            const newName = prompt('Edit Part Name:', appData.equipment[eqIndex].parts[partIndex].name);
+            if (newName && newName.trim() !== '') {
+                appData.equipment[eqIndex].parts[partIndex].name = newName.trim();
+                render();
+            }
+        }
+
+        function deletePart(eqIndex, partIndex) {
+            if (confirm('Delete this part?')) {
+                appData.equipment[eqIndex].parts.splice(partIndex, 1);
+                render();
+            }
+        }
+
+        function updateCount(eqIndex, partIndex, change) {
+            appData.equipment[eqIndex].parts[partIndex].count += change;
+            render();
+        }
+
+        function movePart(eqIndex, partIndex, direction) {
+            const parts = appData.equipment[eqIndex].parts;
+            if (partIndex + direction >= 0 && partIndex + direction < parts.length) {
+                const temp = parts[partIndex];
+                parts[partIndex] = parts[partIndex + direction];
+                parts[partIndex + direction] = temp;
+                render();
+            }
+        }
+
+        // --- Photo Actions ---
+        function attachPhoto(eqIndex, partIndex, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Compress image using Canvas to save LocalStorage space
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 600; // Limit width to keep file size small
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Compress to JPEG format with 0.7 quality
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7); 
+                    
+                    appData.equipment[eqIndex].parts[partIndex].photo = dataUrl;
+                    appData.equipment[eqIndex].parts[partIndex].showPhoto = true; // Show immediately on upload
+                    render();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+            event.target.value = ''; // Reset input
+        }
+
+        function togglePhoto(eqIndex, partIndex) {
+            const part = appData.equipment[eqIndex].parts[partIndex];
+            part.showPhoto = !part.showPhoto;
+            render();
+        }
+
+        function removePhoto(eqIndex, partIndex) {
+            if(confirm("Remove photo?")) {
+                appData.equipment[eqIndex].parts[partIndex].photo = null;
+                appData.equipment[eqIndex].parts[partIndex].showPhoto = false;
+                render();
+            }
+        }
+
+        // --- Shopping List Actions ---
+        function addShopItem() {
+            const input = document.getElementById('newShopItem');
+            const name = input.value.trim();
+            if (name) {
+                appData.shopping.push({ name: name, checked: false });
+                input.value = '';
+                render();
+            }
+        }
+        
+        function handleShopEnter(e) { if (e.key === 'Enter') addShopItem(); }
+
+        function toggleShopItem(index) {
+            appData.shopping[index].checked = !appData.shopping[index].checked;
+            render();
+        }
+
+        function deleteShopItem(index) {
+            appData.shopping.splice(index, 1);
+            render();
+        }
+
+        // --- Global Actions (Theme, Export, Import) ---
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('partsAppTheme', isDark ? 'dark' : 'light');
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `inventory_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.equipment && importedData.shopping) {
+                        appData = importedData;
+                        render();
+                        alert('Data imported successfully!');
+                    } else {
+                        alert('Invalid file format. Make sure it is a backup from this app.');
+                    }
+                } catch (err) {
+                    alert('Error reading file. Please ensure it is a valid JSON backup.');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; 
+        }
+    </script>
+</body>
+</html>
