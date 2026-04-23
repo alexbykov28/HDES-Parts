@@ -56,7 +56,7 @@
 
         button:hover { background-color: var(--btn-hover); }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
-        button.danger { color: #d9534f; font-weight: bold; }
+        button.danger { color: #d9534f; font-weight: bold; border-color: #d9534f; }
         button.action { background-color: #4CAF50; color: white; border: none; }
         button.action:hover { background-color: #45a049; }
 
@@ -64,7 +64,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            padding-bottom: 100px; /* Space for footer */
+            padding-bottom: 100px;
         }
 
         .card {
@@ -80,7 +80,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
             padding-bottom: 10px;
             border-bottom: 1px solid var(--border-color);
             flex-wrap: wrap;
@@ -97,77 +97,92 @@
 
         .card-header h2:hover::after { content: '✎'; font-size: 0.8rem; color: gray; }
 
+        /* POSTER GRID LAYOUT */
+        .parts-list-wrapper {
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
         .part-container {
             background-color: var(--bg-color);
-            border-radius: 4px;
-            margin-bottom: 8px;
-            padding: 10px;
-        }
-
-        .part-item {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
         }
+        
+        .part-container:hover { transform: translateY(-2px); }
 
-        .part-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex: 1;
-        }
-
-        .part-name { cursor: pointer; font-weight: 500; }
+        .part-name { cursor: pointer; font-weight: bold; font-size: 1.1em; text-align: center; display: block; width: 100%; margin-bottom: 10px;}
         .part-name:hover { text-decoration: underline; }
 
-        .part-controls {
+        .photo-area {
+            width: 100%;
+            height: 150px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            justify-content: center;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            background: #eee;
+        }
+        body.dark-mode .photo-area { background: #2a2a2a; }
+        
+        .photo-area img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover; /* Acts like a poster image */
+            border-radius: 4px;
+        }
+
+        .part-controls-grid {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .part-controls-row {
+            display: flex;
+            gap: 5px;
+            justify-content: space-between;
         }
 
         .counter {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 10px;
+            background-color: var(--header-bg);
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
             font-weight: bold;
         }
+        .counter button { padding: 2px 10px; font-size: 16px; }
 
-        .counter button { padding: 2px 8px; font-size: 16px; }
+        .move-controls { display: flex; gap: 5px; flex: 1; }
+        .move-controls button { padding: 4px 0; font-size: 12px; flex: 1; }
 
-        .move-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .move-controls button { padding: 0px 5px; font-size: 10px; }
-
-        .photo-area {
-            margin-top: 10px;
-            text-align: center;
-        }
-        .photo-area img {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 4px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-        }
-
-        /* Shopping List */
-        .shopping-item {
+        /* General Lists */
+        .list-item {
             display: flex;
             align-items: center;
             gap: 10px;
             padding: 8px 0;
             border-bottom: 1px solid var(--border-color);
         }
-        .shopping-item.checked span {
+        .list-item.checked span {
             text-decoration: line-through;
             color: gray;
         }
-        .shopping-item span { flex: 1; }
+        .list-item span { flex: 1; }
 
         .add-shopping {
             display: flex;
@@ -223,12 +238,26 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
+            display: inline-block;
+            text-align: center;
         }
         .file-label:hover { background-color: var(--btn-hover); }
 
-        @media (max-width: 600px) {
-            .part-item { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .part-controls { width: 100%; justify-content: space-between; }
+        @media (max-width: 768px) {
+            .card-header { flex-direction: column; align-items: flex-start; }
+            .card-header > div { width: 100%; justify-content: space-between; }
+        }
+
+        /* Print/PDF Styles */
+        @media print {
+            body { background: white !important; color: black !important; height: auto; }
+            header, footer, .app-controls, .move-controls, button.action, button.danger, .add-shopping, .file-label, button[onclick^="toggleParts"], button[onclick^="togglePhoto"] { display: none !important; }
+            .card { border: 1px solid #ccc; page-break-inside: avoid; box-shadow: none; margin-bottom: 30px; }
+            .counter button { display: none; }
+            .list-item button { display: none; }
+            main { padding: 0; overflow-y: visible; }
+            .parts-list-wrapper { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 10px; } /* Force 3 columns on print */
+            .photo-area { display: flex !important; }
         }
     </style>
 </head>
@@ -236,6 +265,14 @@
 
     <main id="main-content">
         <div id="equipment-container"></div>
+
+        <div class="card" style="border-top-color: #FF9800;">
+            <div class="card-header" style="margin-bottom: 0; padding-bottom: 15px;">
+                <h2 style="cursor: default;">📦 Parts to Order</h2>
+                <button class="action" onclick="copyPartsToOrder()">📋 Copy to Clipboard</button>
+            </div>
+            <div id="parts-order-container" style="margin-top: 10px;"></div>
+        </div>
 
         <div class="card" style="border-top-color: #4CAF50;">
             <div class="card-header" style="margin-bottom: 0; padding-bottom: 15px;">
@@ -250,9 +287,15 @@
 
         <div class="app-controls">
             <button onclick="toggleTheme()">🌓 Toggle Light/Dark Mode</button>
-            <button onclick="exportData()">📤 Export Data</button>
-            <label class="file-label" style="font-size: 14px; padding: 6px 12px;">
-                📥 Import Data
+            
+            <div style="border-left: 2px solid var(--border-color); padding-left: 10px; display: flex; gap: 10px;">
+                <button onclick="exportDataJSON()">📤 Export .json</button>
+                <button onclick="exportDataSQLite()">🗄️ Export SQLite</button>
+                <button onclick="exportPDF()">📄 Export PDF</button>
+            </div>
+
+            <label class="file-label" style="font-size: 14px; padding: 6px 12px; margin-left: 10px;">
+                📥 Import .json
                 <input type="file" id="importFile" accept=".json" onchange="importData(event)">
             </label>
         </div>
@@ -277,6 +320,9 @@
             if (savedData) {
                 try {
                     appData = JSON.parse(savedData);
+                    appData.equipment.forEach(eq => {
+                        if (eq.expanded === undefined) eq.expanded = false;
+                    });
                 } catch (e) { console.error("Error parsing saved data"); }
             }
             
@@ -297,10 +343,14 @@
         // --- Render Functions ---
         function render() {
             const eqContainer = document.getElementById('equipment-container');
+            const partsOrderContainer = document.getElementById('parts-order-container');
             const shopContainer = document.getElementById('shopping-list-container');
             
             eqContainer.innerHTML = '';
+            partsOrderContainer.innerHTML = '';
             shopContainer.innerHTML = '';
+
+            let orderCount = 0;
 
             // Render Equipment
             appData.equipment.forEach((eq, eqIndex) => {
@@ -314,66 +364,93 @@
                 
                 header.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 10px;">
-                        <div class="move-controls">
-                            <button onclick="moveEquipment(${eqIndex}, -1)" ${eqIndex === 0 ? 'disabled' : ''}>▲</button>
-                            <button onclick="moveEquipment(${eqIndex}, 1)" ${eqIndex === appData.equipment.length - 1 ? 'disabled' : ''}>▼</button>
-                        </div>
                         <input type="color" value="${eq.color || '#ccc'}" onchange="changeEqColor(${eqIndex}, this.value)" style="width: 30px; height: 30px; padding: 0; border: none; cursor: pointer; background: none;" title="Change Equipment Color">
                         <h2 onclick="editEquipment(${eqIndex})">${eq.name}</h2>
                     </div>
                     <div style="display: flex; gap: 10px; align-items: center;">
+                        <button onclick="toggleParts(${eqIndex})">${eq.expanded ? '📂 Hide Parts' : '📁 Show Parts'} (${eq.parts.length})</button>
                         <button class="action" onclick="addPart(${eqIndex})">+ Add Part</button>
                         <button class="danger" onclick="deleteEquipment(${eqIndex})" title="Delete Equipment">X</button>
+                        <div class="move-controls" style="flex: none; flex-direction: column;">
+                            <button onclick="moveEquipment(${eqIndex}, -1)" ${eqIndex === 0 ? 'disabled' : ''}>▲</button>
+                            <button onclick="moveEquipment(${eqIndex}, 1)" ${eqIndex === appData.equipment.length - 1 ? 'disabled' : ''}>▼</button>
+                        </div>
                     </div>
                 `;
                 card.appendChild(header);
 
-                // Parts List
+                // Parts List Wrapper (CSS Grid)
+                const partsWrapper = document.createElement('div');
+                partsWrapper.className = 'parts-list-wrapper';
+                partsWrapper.style.display = eq.expanded ? 'grid' : 'none';
+
+                // Render Individual Parts (Movie Poster Style)
                 eq.parts.forEach((part, partIndex) => {
+                    // Populate "Parts to Order" logic
+                    if (part.count > 0) {
+                        const orderItem = document.createElement('div');
+                        orderItem.className = 'list-item';
+                        orderItem.innerHTML = `<span style="font-weight: 500;">${part.name} - QTY: <b style="color: #FF9800;">${part.count}</b></span>`;
+                        partsOrderContainer.appendChild(orderItem);
+                        orderCount++;
+                    }
+
                     const partContainer = document.createElement('div');
                     partContainer.className = 'part-container';
                     
                     partContainer.innerHTML = `
-                        <div class="part-item">
-                            <div class="part-info">
-                                <div class="move-controls">
-                                    <button onclick="movePart(${eqIndex}, ${partIndex}, -1)" ${partIndex === 0 ? 'disabled' : ''}>▲</button>
-                                    <button onclick="movePart(${eqIndex}, ${partIndex}, 1)" ${partIndex === eq.parts.length - 1 ? 'disabled' : ''}>▼</button>
-                                </div>
-                                <span class="part-name" onclick="editPart(${eqIndex}, ${partIndex})">${part.name}</span>
-                            </div>
-                            <div class="part-controls">
-                                <label class="file-label" title="Attach Photo">
-                                    📷 Add
-                                    <input type="file" accept="image/*" onchange="attachPhoto(${eqIndex}, ${partIndex}, event)">
-                                </label>
-                                ${part.photo ? `<button onclick="togglePhoto(${eqIndex}, ${partIndex})" style="padding: 4px 8px; font-size: 12px;">${part.showPhoto ? '🙈 Hide' : '👁️ Show'}</button>` : ''}
-                                <div class="counter">
-                                    <button onclick="updateCount(${eqIndex}, ${partIndex}, -1)">-</button>
-                                    <span>${part.count}</span>
-                                    <button onclick="updateCount(${eqIndex}, ${partIndex}, 1)">+</button>
-                                </div>
-                                <button class="danger" onclick="deletePart(${eqIndex}, ${partIndex})">X</button>
-                            </div>
-                        </div>
                         ${part.photo && part.showPhoto ? `
                             <div class="photo-area">
                                 <img src="${part.photo}" alt="Part Photo">
-                                <br>
-                                <button class="danger" onclick="removePhoto(${eqIndex}, ${partIndex})" style="margin-top: 10px; font-size: 12px;">🗑️ Remove Photo</button>
                             </div>
-                        ` : ''}
+                        ` : `<div class="photo-area" style="color: #999;">No Image</div>`}
+                        
+                        <span class="part-name" onclick="editPart(${eqIndex}, ${partIndex})">${part.name}</span>
+                        
+                        <div class="part-controls-grid">
+                            <div class="counter">
+                                <button onclick="updateCount(${eqIndex}, ${partIndex}, -1)">-</button>
+                                <span style="min-width: 25px; text-align: center;">${part.count}</span>
+                                <button onclick="updateCount(${eqIndex}, ${partIndex}, 1)">+</button>
+                            </div>
+
+                            <div class="part-controls-row">
+                                <label class="file-label" title="Attach Photo" style="flex: 1;">
+                                    📷 Add
+                                    <input type="file" accept="image/*" onchange="attachPhoto(${eqIndex}, ${partIndex}, event)">
+                                </label>
+                                ${part.photo ? `<button onclick="togglePhoto(${eqIndex}, ${partIndex})" style="flex: 1;">${part.showPhoto ? '🙈 Hide' : '👁️ Show'}</button>` : ''}
+                            </div>
+
+                            ${part.photo && part.showPhoto ? `
+                                <button class="danger" onclick="removePhoto(${eqIndex}, ${partIndex})" style="font-size: 12px; width: 100%;">🗑️ Remove Photo</button>
+                            ` : ''}
+
+                            <div class="part-controls-row" style="margin-top: 5px;">
+                                <div class="move-controls">
+                                    <button onclick="movePart(${eqIndex}, ${partIndex}, -1)" ${partIndex === 0 ? 'disabled' : ''} title="Move Left">◀</button>
+                                    <button onclick="movePart(${eqIndex}, ${partIndex}, 1)" ${partIndex === eq.parts.length - 1 ? 'disabled' : ''} title="Move Right">▶</button>
+                                </div>
+                                <button class="danger" onclick="deletePart(${eqIndex}, ${partIndex})" title="Delete Part" style="padding: 4px 10px;">🗑️</button>
+                            </div>
+                        </div>
                     `;
-                    card.appendChild(partContainer);
+                    partsWrapper.appendChild(partContainer);
                 });
 
+                card.appendChild(partsWrapper);
                 eqContainer.appendChild(card);
             });
+
+            // Handle Empty Parts Order state
+            if (orderCount === 0) {
+                partsOrderContainer.innerHTML = '<div style="color: gray; font-style: italic; padding: 10px 0;">No parts currently above QTY 0. Increase a part counter to add it here.</div>';
+            }
 
             // Render Shopping List
             appData.shopping.forEach((item, index) => {
                 const shopRow = document.createElement('div');
-                shopRow.className = `shopping-item ${item.checked ? 'checked' : ''}`;
+                shopRow.className = `list-item ${item.checked ? 'checked' : ''}`;
                 
                 shopRow.innerHTML = `
                     <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleShopItem(${index})">
@@ -386,6 +463,32 @@
             saveData();
         }
 
+        // --- Ordering Actions ---
+        function copyPartsToOrder() {
+            let orderText = "Parts to Order:\n\n";
+            let hasItems = false;
+            
+            appData.equipment.forEach(eq => {
+                eq.parts.forEach(part => {
+                    if (part.count > 0) {
+                        orderText += `${part.name} - QTY: ${part.count}\n`;
+                        hasItems = true;
+                    }
+                });
+            });
+
+            if (!hasItems) {
+                alert("No parts are above QTY 0 to copy.");
+                return;
+            }
+
+            navigator.clipboard.writeText(orderText).then(() => {
+                alert("Parts list copied to clipboard successfully!");
+            }).catch(err => {
+                alert("Failed to copy list: " + err);
+            });
+        }
+
         // --- Equipment Actions ---
         function addEquipment() {
             const nameInput = document.getElementById('newEqName');
@@ -396,6 +499,7 @@
                 appData.equipment.push({
                     name: name,
                     color: colorInput.value,
+                    expanded: true,
                     parts: []
                 });
                 nameInput.value = '';
@@ -426,6 +530,11 @@
             render();
         }
 
+        function toggleParts(index) {
+            appData.equipment[index].expanded = !appData.equipment[index].expanded;
+            render();
+        }
+
         function moveEquipment(index, direction) {
             if (index + direction >= 0 && index + direction < appData.equipment.length) {
                 const temp = appData.equipment[index];
@@ -445,6 +554,7 @@
                     photo: null,
                     showPhoto: false
                 });
+                appData.equipment[eqIndex].expanded = true;
                 render();
             }
         }
@@ -484,13 +594,12 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            // Compress image using Canvas to save LocalStorage space
             const reader = new FileReader();
             reader.onload = function(e) {
                 const img = new Image();
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 600; // Limit width to keep file size small
+                    const MAX_WIDTH = 500; // Scaled for posters
                     let width = img.width;
                     let height = img.height;
 
@@ -504,17 +613,16 @@
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
                     
-                    // Compress to JPEG format with 0.7 quality
                     const dataUrl = canvas.toDataURL('image/jpeg', 0.7); 
                     
                     appData.equipment[eqIndex].parts[partIndex].photo = dataUrl;
-                    appData.equipment[eqIndex].parts[partIndex].showPhoto = true; // Show immediately on upload
+                    appData.equipment[eqIndex].parts[partIndex].showPhoto = true;
                     render();
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
-            event.target.value = ''; // Reset input
+            event.target.value = '';
         }
 
         function togglePhoto(eqIndex, partIndex) {
@@ -561,18 +669,65 @@
             localStorage.setItem('partsAppTheme', isDark ? 'dark' : 'light');
         }
 
-        function exportData() {
-            const dataStr = JSON.stringify(appData, null, 2);
-            const blob = new Blob([dataStr], { type: "application/json" });
+        function triggerDownload(content, filename, type) {
+            const blob = new Blob([content], { type: type });
             const url = URL.createObjectURL(blob);
-            
             const a = document.createElement('a');
             a.href = url;
-            a.download = `inventory_backup_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        function exportDataJSON() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            triggerDownload(dataStr, `inventory_backup_${new Date().toISOString().split('T')[0]}.json`, "application/json");
+        }
+
+        function exportDataSQLite() {
+            let sql = `-- Equipment & Parts Tracker Export\n`;
+            sql += `CREATE TABLE IF NOT EXISTS Equipment (id INTEGER PRIMARY KEY, name TEXT, color TEXT);\n`;
+            sql += `CREATE TABLE IF NOT EXISTS Parts (id INTEGER PRIMARY KEY, eq_id INTEGER, name TEXT, count INTEGER, photo TEXT);\n`;
+            sql += `CREATE TABLE IF NOT EXISTS ShoppingList (id INTEGER PRIMARY KEY, name TEXT, checked INTEGER);\n\n`;
+
+            appData.equipment.forEach((eq, eqIndex) => {
+                const safeName = eq.name.replace(/'/g, "''");
+                sql += `INSERT INTO Equipment (id, name, color) VALUES (${eqIndex}, '${safeName}', '${eq.color}');\n`;
+                
+                eq.parts.forEach((part, partIndex) => {
+                    const safePartName = part.name.replace(/'/g, "''");
+                    const photoData = part.photo ? `'${part.photo}'` : `NULL`;
+                    sql += `INSERT INTO Parts (id, eq_id, name, count, photo) VALUES (${eqIndex}_${partIndex}, ${eqIndex}, '${safePartName}', ${part.count}, ${photoData});\n`;
+                });
+            });
+
+            sql += `\n`;
+            appData.shopping.forEach((item, index) => {
+                const safeName = item.name.replace(/'/g, "''");
+                sql += `INSERT INTO ShoppingList (id, name, checked) VALUES (${index}, '${safeName}', ${item.checked ? 1 : 0});\n`;
+            });
+
+            triggerDownload(sql, `inventory_db_${new Date().toISOString().split('T')[0]}.sql`, "text/sql");
+        }
+
+        function exportPDF() {
+            const stateBackup = JSON.stringify(appData);
+
+            appData.equipment.forEach(eq => {
+                eq.expanded = true;
+                eq.parts.forEach(p => {
+                    if (p.photo) p.showPhoto = true;
+                });
+            });
+            render();
+
+            setTimeout(() => {
+                window.print(); 
+                appData = JSON.parse(stateBackup);
+                render();
+            }, 500);
         }
 
         function importData(event) {
@@ -585,6 +740,11 @@
                     const importedData = JSON.parse(e.target.result);
                     if (importedData.equipment && importedData.shopping) {
                         appData = importedData;
+                        
+                        appData.equipment.forEach(eq => {
+                            if (eq.expanded === undefined) eq.expanded = false;
+                        });
+
                         render();
                         alert('Data imported successfully!');
                     } else {
